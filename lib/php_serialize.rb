@@ -90,8 +90,8 @@ module PHP
 
 			when Struct, OpenStruct
 				# encode as Object with same name
-				class_name = 'stdObject'
-				s << "O:#{class_name.length}:\"#{class_name.downcase}\":#{var.members.length}:{"
+				class_name = 'stdClass'
+				s << "O:#{class_name.length}:\"#{class_name}\":#{var.members.length}:{"
 				var.members.each do |member|
 					s << "#{PHP.serialize(member, assoc)}#{PHP.serialize(var[member], assoc)}"
 				end
