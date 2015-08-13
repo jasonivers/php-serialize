@@ -268,7 +268,9 @@ private
 
 				val = nil
 				# See if we need to map to a particular object
-				if classmap.has_key?(klass)
+				if klass == :Stdclass
+					val = OpenStruct.new
+				elsif classmap.has_key?(klass)
 					val = classmap[klass].new
 				elsif Struct.const_defined?(klass) # Nope; see if there's a Struct
 					classmap[klass] = val = Struct.const_get(klass)
