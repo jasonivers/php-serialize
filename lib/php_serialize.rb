@@ -91,9 +91,10 @@ module PHP
 			when Struct, OpenStruct
 				# encode as Object with same name
 				class_name = 'stdClass'
-				s << "O:#{class_name.length}:\"#{class_name}\":#{var.members.length}:{"
-				var.members.each do |member|
-					s << "#{PHP.serialize(member, assoc)}#{PHP.serialize(var[member], assoc)}"
+				hash = var.to_h
+				s << "O:#{class_name.length}:\"#{class_name}\":#{hash.length}:{"
+				hash.each do |key, value|
+					s << "#{PHP.serialize(key, assoc)}#{PHP.serialize(hash[key], assoc)}"
 				end
 				s << '}'
 
@@ -112,6 +113,9 @@ module PHP
 			when FalseClass, TrueClass
 				s << "b:#{var ? 1 :0};"
 
+			when ActiveSupport::TimeWithZone
+					time_string = var.strftime("%Y-%m-%d %H:%M:%S")
+					s << "s:#{time_string.bytesize}:\"#{time_string}\";"
 			else
 				if var.respond_to?(:to_assoc)
 					v = var.to_assoc
@@ -201,7 +205,7 @@ module PHP
 
 		ret = nil
 		string = StringIOReader.new(string)
-		while string.string[string.pos, 32] =~ /^(\w+)\|/ # session_name|serialized_data
+		while string.string[string.pos, 32] =~ /^([\w\-]+)\|/ # session_name|serialized_data
 			ret ||= {}
 			string.pos += $&.size
 			ret[$1] = PHP.do_unserialize(string, classmap, assoc)
